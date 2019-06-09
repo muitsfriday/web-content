@@ -1,0 +1,32 @@
+version: '3'
+services: 
+  user:
+    image: node:10.15.3
+    volumes:
+      - ./services/user/:/app
+    working_dir: /app
+    environment:
+      - PORT=3000
+      - MONGO_URL=mongodb://mongodb:27017
+      - DB_NAME=user
+    ports:
+      - 80:3000
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        npm install yarn -g
+        yarn install
+        yarn dev 
+  mongodb:
+    image: mongo:latest
+    container_name: 'mongo_db'
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - 27017:27017
+    command: mongod --smallfiles --logpath=/dev/null           
+      
