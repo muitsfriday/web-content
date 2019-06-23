@@ -1,4 +1,6 @@
-const MongoClient = require('mongodb').MongoClient
+const mongo = require('mongodb')
+const MongoClient = mongo.MongoClient
+const ObjectID = mongo.ObjectID
 
 
 const connectMongo = (url, dbName, callback) => {
@@ -17,6 +19,11 @@ const connectMongo = (url, dbName, callback) => {
 	})
 }
 
+
+const toID = (id) => new ObjectID(id)
+
+
 module.exports = {
-	connect: connectMongo
+	connect: connectMongo,
+	toID: toID
 }

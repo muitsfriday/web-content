@@ -1,9 +1,11 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const mongo = require('./db/mongo')
+const jwt = require('jsonwebtoken')
 
 const url = process.env.MONGO_URL
 const dbName = process.env.DB_NAME
+const jwtSecret = process.env.JWT_SECRET
 
 
 let db = null
@@ -27,7 +29,75 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.get('/', (req, res) => {
-	res.send('hello world 10')
+	db.collection('account').find({}).toArray((err, result) => {
+		if (err) {
+			return res.json({
+				error: err.message
+			})
+		}
+
+		return res.json({
+			data: result
+		})
+	})
+})
+
+app.get('/:id', (req, res) => {
+	const id = req.params.id
+	db.collection('account').findOne({ _id: mongo.toID(id) }, (err, result) => {
+		if (err) {
+			return res.json({
+				error: err.message
+			})
+		}
+
+		return res.json({
+			data: result
+		})
+	})
+})
+
+
+app.post('/auth', (req, res) => {
+	const username = req.body.username
+	const password = req.body.password
+
+	const filter = { username: username }
+	console.log(filter)
+
+	db.collection('account').findOne(filter, (err, result) => {
+			console.log(err, result)
+			if(err){
+					return res.json({err})
+			}
+			if(!result.username){
+					return res.json({ message: 'user not found'})
+			}
+
+			if(result.password === password){
+					const token = jwt.sign({
+							username: result.username
+					}, jwtSecret, { expiresIn: '2h'})
+					return res.json({ token: token})
+			}
+
+			return res.json({ message: 'Invalid Username'})
+	})
+
+})
+
+app.post('/:id', (req, res) => {
+	const id = req.params.id
+	const password = req.body.password
+
+	const filter = { _id: mongo.toID(id) }
+	const update = { '$set': { password: password } }
+
+	db.collection('account').updateOne(filter, update, (err, result) => {
+		res.json({
+			data: result.result.ok > 0
+		})
+	})
 })
 
 app.post('/', (req, res) => {
@@ -52,6 +122,7 @@ app.post('/', (req, res) => {
 		})
 	})
 })
+
 
 app.listen(process.env.PORT, () => {
 	console.log('service user listening at port: ' + process.env.PORT)
