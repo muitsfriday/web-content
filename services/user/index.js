@@ -2,11 +2,13 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const mongo = require('./db/mongo')
 const jwt = require('jsonwebtoken')
+const jwtVerify = require('express-jwt')
 
 const url = process.env.MONGO_URL
 const dbName = process.env.DB_NAME
 const jwtSecret = process.env.JWT_SECRET
 
+const auth = jwtVerify({ secret: jwtSecret })
 
 let db = null
 mongo.connect(url, dbName, (instance) => {
@@ -42,7 +44,7 @@ app.get('/', (req, res) => {
 	})
 })
 
-app.get('/:id', (req, res) => {
+app.get('/u/:id', (req, res) => {
 	const id = req.params.id
 	db.collection('account').findOne({ _id: mongo.toID(id) }, (err, result) => {
 		if (err) {
@@ -57,20 +59,31 @@ app.get('/:id', (req, res) => {
 	})
 })
 
+app.post('/u/:id', (req, res) => {
+	const id = req.params.id
+	const password = req.body.password
+
+	const filter = { _id: mongo.toID(id) }
+	const update = { '$set': { password: password } }
+
+	db.collection('account').updateOne(filter, update, (err, result) => {
+		res.json({
+			data: result.result.ok > 0
+		})
+	})
+})
 
 app.post('/auth', (req, res) => {
 	const username = req.body.username
 	const password = req.body.password
 
 	const filter = { username: username }
-	console.log(filter)
 
 	db.collection('account').findOne(filter, (err, result) => {
-			console.log(err, result)
 			if(err){
 					return res.json({err})
 			}
-			if(!result.username){
+			if(!result){
 					return res.json({ message: 'user not found'})
 			}
 
@@ -86,19 +99,12 @@ app.post('/auth', (req, res) => {
 
 })
 
-app.post('/:id', (req, res) => {
-	const id = req.params.id
-	const password = req.body.password
-
-	const filter = { _id: mongo.toID(id) }
-	const update = { '$set': { password: password } }
-
-	db.collection('account').updateOne(filter, update, (err, result) => {
-		res.json({
-			data: result.result.ok > 0
-		})
+app.get('/getInfo', auth, (req, res) => {
+	return res.json({
+		data: req.user
 	})
 })
+
 
 app.post('/', (req, res) => {
 	const username = req.body.username
@@ -123,6 +129,12 @@ app.post('/', (req, res) => {
 	})
 })
 
+
+app.use(function (err, req, res, next) {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).send('invalid token...')
+  }
+})
 
 app.listen(process.env.PORT, () => {
 	console.log('service user listening at port: ' + process.env.PORT)
