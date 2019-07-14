@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const mongo = require('./db/mongo')
 const jwt = require('jsonwebtoken')
 const jwtVerify = require('express-jwt')
+const pw = require('./utils/password')
 
 const url = process.env.MONGO_URL
 const dbName = process.env.DB_NAME
@@ -87,11 +88,11 @@ app.post('/auth', (req, res) => {
 					return res.json({ message: 'user not found'})
 			}
 
-			if(result.password === password){
+			if(pw.compare(password, result.password)){
 					const token = jwt.sign({
 							username: result.username
 					}, jwtSecret, { expiresIn: '2h'})
-					return res.json({ token: token})
+					return res.json({ token: token })
 			}
 
 			return res.json({ message: 'Invalid Username'})
@@ -106,9 +107,9 @@ app.get('/getInfo', auth, (req, res) => {
 })
 
 
-app.post('/', (req, res) => {
+app.post('/u', (req, res) => {
 	const username = req.body.username
-	const password = req.body.password
+	const password = pw.hash(req.body.password)
 	const accountCollection = db.collection('account')
 
 	const filter = { 'username': username }
