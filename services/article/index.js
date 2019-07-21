@@ -20,7 +20,6 @@ const app = express()
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-
 app.get('/', (req, res) => {
 	console.log('req.xxx: ', req.xxx)
 	const collecton = db.collection('article')

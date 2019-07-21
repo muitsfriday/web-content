@@ -25,19 +25,36 @@ services:
       - ./services/article/:/app
     working_dir: /app
     environment:
-      - PORT=3000
+      - PORT=80
       - MONGO_URL=mongodb://mongodb:27017
       - DB_NAME=article
       - JWT_SECRET=__JWT_SECRET_KEY__
     ports:
-      - 3001:3000
+      - 3001:80
     command: 
       - /bin/bash
       - -c
       - |
         npm install yarn -g
         yarn install
-        yarn dev       
+        yarn dev  
+  frontend: 
+    image: node:10.15.3
+    volumes:
+      - ./services/frontend/:/app
+    working_dir: /app
+    environment:
+      - PORT=3000
+      - ARTICLE_API_PATH=http://article
+    ports:
+      - 80:3000
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        npm install yarn -g
+        yarn install
+        yarn dev            
   mongodb:
     image: mongo:latest
     container_name: 'mongo_db'
@@ -49,4 +66,3 @@ services:
     ports:
       - 27017:27017
     command: mongod --smallfiles --logpath=/dev/null           
-      

@@ -1,0 +1,11 @@
+body {
+	background: #ddd;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+.card-info {
+	color: #777;
+}
