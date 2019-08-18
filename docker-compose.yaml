@@ -38,13 +38,14 @@ services:
         npm install yarn -g
         yarn install
         yarn dev  
-  frontend: 
+  web: 
     image: node:10.15.3
     volumes:
-      - ./services/frontend/:/app
+      - ./services/web/:/app
     working_dir: /app
     environment:
       - PORT=3000
+      - JWT_SECRET=__JWT_SECRET_KEY__
       - ARTICLE_API_PATH=http://article
     ports:
       - 80:3000
