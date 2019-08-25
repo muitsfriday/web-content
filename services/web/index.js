@@ -1,3 +1,4 @@
+const fs = require('fs')
 const express = require('express')
 const bodyParser = require('body-parser')
 const fetch = require('node-fetch')
@@ -28,12 +29,22 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use('/public', express.static('public'))
 
-const fs = require('fs')
 app.engine('html', (filePath, options, callback) => {
+  console.log('filePath', filePath, )
   fs.readFile(filePath, (err, content) => {
     if (err) return callback(err)
 
     let rendered = content.toString()
+    let includePattern = /\[\[\s*(.+?)\s*\]\]/g
+    let matches
+    while (matches = includePattern.exec(rendered)) {
+      const matchedPattern = matches[0]
+      const fileName = matches[1]
+      const path = `${__dirname}/views/${fileName}`
+      const data = fs.readFileSync(path)
+      rendered = rendered.replace(matchedPattern, data)
+    }
+
     for (let key in options.data || {}) {
       rendered = rendered.replace('{{ ' + key + ' }}', options.data[key])
     }
@@ -60,16 +71,20 @@ const renderArticleCard = article => {
   `
 }
 
-app.get('/', (req, res) => {
+app.get('/', auth, (req, res) => {
+  const user = req.user
+
   fetch(serviceArticle)
     .then(res => res.json())
     .then(data => {
       const articles = data.list.map(renderArticleCard).join('')
-
       res.render('index', {
         data: {
           test: 'test template',
-          articles: articles
+          articles: articles,
+          isLoginClass: user ? '' : 'd-none',
+          isNotLoginClass: user ? 'd-none' : '',
+          username: user ? user.username : ''
         }
       })
     })

@@ -56,6 +56,25 @@ services:
         npm install yarn -g
         yarn install
         yarn dev            
+  web_dashboard: 
+    image: node:10.15.3
+    volumes:
+      - ./services/web-dashboard/:/app
+    working_dir: /app
+    environment:
+      - PORT=3000
+      - JWT_SECRET=__JWT_SECRET_KEY__
+      - ARTICLE_API_PATH=http://article
+      - USER_API_PATH=http://user
+    ports:
+      - 8080:3000
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        npm install yarn -g
+        yarn install
+        yarn dev                  
   mongodb:
     image: mongo:latest
     container_name: 'mongo_db'
