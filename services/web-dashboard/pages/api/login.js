@@ -18,7 +18,8 @@ export default (req, res) => {
 
 		res.status(200).json({
 			status: true,
-			jwt: response.data.token
+			jwt: response.data.token,
+			info: response.data.info
 		})
 	})
 }

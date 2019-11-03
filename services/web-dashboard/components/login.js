@@ -13,6 +13,8 @@ const Container = styled.div`
 	margin: 20px;
 	border: 1px #ccc solid;
 	border-radius: 5px;
+	background-color: white;
+	color: #434343;
 `
 
 const InnerWrapper = styled.div`
@@ -24,6 +26,7 @@ const Head = styled.h1`
 	font-size: 31px;
 	text-align: center;
 	font-family: ${props => props.theme.font.family};
+	color: #434343;
 `
 
 const InputText = styled.input`
@@ -54,12 +57,6 @@ const Button = styled.button`
 
 const LoginModal = (props) => {
 
-	if (!props.jwt) {
-		const token = Cookies.get('jwt')
-		if (token) {
-			props.setJwt(token)
-		}
-	}
 
 	const [username, setUsername] = useState(props.username || '')
 	const [password, setPassword] = useState('')
@@ -88,7 +85,6 @@ const LoginModal = (props) => {
 	const getLoginBox = () => (
 		<InnerWrapper>
 				<Head>Sign In</Head>
-				<p>jwt: {props.jwt}</p>
 				{
 					error 
 						? (<p>{error}</p>) 

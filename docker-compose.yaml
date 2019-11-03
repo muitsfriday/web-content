@@ -6,12 +6,12 @@ services:
       - ./services/user/:/app
     working_dir: /app
     environment:
-      - PORT=3000
+      - PORT=5001
       - MONGO_URL=mongodb://mongodb:27017
       - DB_NAME=user
       - JWT_SECRET=__JWT_SECRET_KEY__
     ports:
-      - 3000:3000
+      - 5001:5001
     depends_on:
       - mongodb
     command: npm run dev
@@ -27,12 +27,12 @@ services:
       - ./services/article/:/app
     working_dir: /app
     environment:
-      - PORT=80
+      - PORT=5002
       - MONGO_URL=mongodb://mongodb:27017
       - DB_NAME=article
       - JWT_SECRET=__JWT_SECRET_KEY__
     ports:
-      - 3001:80
+      - 5002:5002
     depends_on:
       - mongodb  
     command: npm run dev
@@ -70,10 +70,10 @@ services:
     environment:
       - PORT=3000
       - JWT_SECRET=__JWT_SECRET_KEY__
-      - ARTICLE_API_PATH=http://article:3001
-      - USER_API_PATH=http://user:3000
+      - ARTICLE_API_PATH=http://article:5002
+      - USER_API_PATH=http://user:5001
     ports:
-      - 8080:3000
+      - 3000:3000
     
     command: npm run dev
     #  - /bin/bash

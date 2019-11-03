@@ -92,12 +92,23 @@ app.post("/auth", (req, res) => {
     if (pw.compare(password, result.password)) {
       const token = jwt.sign(
         {
-          username: result.username
+          username: result.username,
+          email: result.email,
+          alias: result.alias,
+          avatar: result.avatar,
         },
         jwtSecret,
         { expiresIn: "2h" }
       );
-      return res.json({ token: token });
+      return res.json({ 
+        token: token,
+        info: {
+          username: result.username,
+          email: result.email,
+          alias: result.alias,
+          avatar: result.avatar,
+        }
+      });
     }
 
     return res.json({ message: "Invalid Username", err: "INVALID_PASSWORD" });
@@ -112,11 +123,39 @@ app.get("/getInfo", auth, (req, res) => {
 
 app.post("/u", (req, res) => {
   const username = req.body.username;
+  const email = req.body.email;
+  const alias = req.body.alias || '';
+  const avatar = req.body.avatar || '';
   const password = pw.hash(req.body.password);
   const accountCollection = db.collection("account");
 
-  const filter = { username: username };
-  const document = { username: username, password: password };
+  if (!username) {
+    return res.json({
+      status: false,
+      message: "username is required"
+    })
+  }
+
+  if (!email) {
+    return res.json({
+      status: false,
+      message: "email is required"
+    })
+  }
+
+  const filter = { 
+    $or: [
+      { username: username }, 
+      { email: email } 
+    ]
+  };
+  const document = { 
+    username: username, 
+    password: password, 
+    email: email,
+    alias: alias,
+    avatar: avatar,
+  };
 
   accountCollection.findOne(filter, (err, d) => {
     if (d) {
