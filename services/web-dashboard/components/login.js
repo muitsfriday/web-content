@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { escapeComponent } from 'uri-js';
+import Cookies from 'js-cookie'
+import { onLogin, onLogout, onJwtReceived } from '../store'
 
 const Wrapper = styled.div`
 	width: 100%;
@@ -51,9 +52,19 @@ const Button = styled.button`
 `
 
 
-export default (props) => {
+const LoginModal = (props) => {
+
+	if (!props.jwt) {
+		const token = Cookies.get('jwt')
+		if (token) {
+			props.setJwt(token)
+		}
+	}
+
 	const [username, setUsername] = useState(props.username || '')
 	const [password, setPassword] = useState('')
+	const [error, setError] = useState('')
+
 
 	const handleUsernameChange = (e) => { 
 		setUsername(e.target.value) 
@@ -61,22 +72,62 @@ export default (props) => {
 	const handlePasswordChange = (e) => {
 		setPassword(e.target.value)
 	}
+
 	const handleLogin = () => {
-		console.log(username, password)
+		// request
+		props.login(username, password, (response) => {
+			if (!response.data.status) setError(response.data.error)
+			else setError('')
+		})
 	}
+
+	const handleLogout = () => {
+		props.logout()
+	}
+
+	const getLoginBox = () => (
+		<InnerWrapper>
+				<Head>Sign In</Head>
+				<p>jwt: {props.jwt}</p>
+				{
+					error 
+						? (<p>{error}</p>) 
+						: null
+				}
+				<InputText value={username} onChange={handleUsernameChange} placeholder="Username" />
+				<InputText value={password} onChange={handlePasswordChange} type="password" placeholder="Password" />
+				<Button onClick={handleLogin} >Login</Button>
+		</InnerWrapper>
+	)
+
+	const getLogoutBox = () => (
+		<InnerWrapper>
+				<p>jwt: {props.jwt}</p>
+				<Button onClick={handleLogout} >Logout</Button>
+		</InnerWrapper>
+	)
 
 	return (
 		<Wrapper>
 			<Container>
-				<InnerWrapper>
-					  <Head>Sign In</Head>
-						<InputText value={username} onChange={handleUsernameChange} placeholder="Username" />
-						<InputText value={password} onChange={handlePasswordChange} type="password" placeholder="Password" />
-						<Button onClick={handleLogin} >Login</Button>
-				</InnerWrapper>
+				{
+					props.jwt ? getLogoutBox() : getLoginBox()
+				}
 			</Container>
 		</Wrapper>
 	)
 }
 
+const mapStoreToProps = store => {
+	return {
+		jwt: store.jwt,
+	}
+}
 
+const mapActionToProps = {
+	login: onLogin,
+	logout: onLogout,
+	setJwt: onJwtReceived
+}
+
+export default connect(mapStoreToProps, mapActionToProps)(LoginModal)

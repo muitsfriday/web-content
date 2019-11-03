@@ -1,7 +1,7 @@
 version: '3'
 services: 
   user:
-    image: node:10.15.3
+    image: node:10.15.3-alpine
     volumes:
       - ./services/user/:/app
     working_dir: /app
@@ -12,15 +12,17 @@ services:
       - JWT_SECRET=__JWT_SECRET_KEY__
     ports:
       - 3000:3000
-    command: 
-      - /bin/bash
-      - -c
-      - |
-        npm install yarn -g
-        yarn install
-        yarn dev 
+    depends_on:
+      - mongodb
+    command: npm run dev
+    #  - /bin/bash
+    #  - -c
+    #  - |
+    #    npm install yarn -g
+    #    yarn install
+    #    yarn dev 
   article:
-    image: node:10.15.3
+    image: node:10.15.3-alpine
     volumes:
       - ./services/article/:/app
     working_dir: /app
@@ -31,15 +33,17 @@ services:
       - JWT_SECRET=__JWT_SECRET_KEY__
     ports:
       - 3001:80
-    command: 
-      - /bin/bash
-      - -c
-      - |
-        npm install yarn -g
-        yarn install
-        yarn dev  
+    depends_on:
+      - mongodb  
+    command: npm run dev
+    #  - /bin/bash
+    #  - -c
+    #  - |
+    #    npm install yarn -g
+    #    yarn install
+    #    yarn dev  
   web: 
-    image: node:10.15.3
+    image: node:10.15.3-alpine
     volumes:
       - ./services/web/:/app
     working_dir: /app
@@ -49,32 +53,35 @@ services:
       - ARTICLE_API_PATH=http://article
     ports:
       - 80:3000
-    command: 
-      - /bin/bash
-      - -c
-      - |
-        npm install yarn -g
-        yarn install
-        yarn dev            
+    depends_on:
+      - mongodb    
+    command: npm run dev
+    #  - /bin/bash
+    #  - -c
+    #  - |
+    #    npm install yarn -g
+    #    yarn install
+    #    yarn dev            
   web_dashboard: 
-    image: node:10.15.3
+    image: node:10.15.3-alpine
     volumes:
       - ./services/web-dashboard/:/app
     working_dir: /app
     environment:
       - PORT=3000
       - JWT_SECRET=__JWT_SECRET_KEY__
-      - ARTICLE_API_PATH=http://article
-      - USER_API_PATH=http://user
+      - ARTICLE_API_PATH=http://article:3001
+      - USER_API_PATH=http://user:3000
     ports:
       - 8080:3000
-    command: 
-      - /bin/bash
-      - -c
-      - |
-        npm install yarn -g
-        yarn install
-        yarn dev                  
+    
+    command: npm run dev
+    #  - /bin/bash
+    #  - -c
+    #  - |
+    #    npm install yarn -g
+    #    yarn install
+    #    yarn dev                  
   mongodb:
     image: mongo:latest
     container_name: 'mongo_db'

@@ -8,6 +8,7 @@ function Home() {
     <div>
       <Toolbar title="homepage" />
       <Login username="example" />
+      <Login username="" />
       <h1>Welcome to Next.js!, Hello World 2</h1>
       <p>this is my first next.js</p>
     </div>
