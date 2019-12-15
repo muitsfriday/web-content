@@ -1,17 +1,29 @@
 version: '3'
 services: 
+  nginx-proxy:
+    image: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./scripts/proxy:/etc/nginx
+    depends_on:
+      - user
+      - article
+      - web_content
   user:
     image: node:10.15.3-alpine
     volumes:
       - ./services/user/:/app
     working_dir: /app
     environment:
-      - PORT=5001
+      - PORT=3000
       - MONGO_URL=mongodb://mongodb:27017
       - DB_NAME=user
       - JWT_SECRET=__JWT_SECRET_KEY__
-    ports:
-      - 5001:5001
+    # ports:
+    #  - 5001:5001
     depends_on:
       - mongodb
     command: npm run dev
@@ -27,12 +39,12 @@ services:
       - ./services/article/:/app
     working_dir: /app
     environment:
-      - PORT=5002
+      - PORT=3000
       - MONGO_URL=mongodb://mongodb:27017
       - DB_NAME=article
       - JWT_SECRET=__JWT_SECRET_KEY__
-    ports:
-      - 5002:5002
+    # ports:
+    #  - 5002:5002
     depends_on:
       - mongodb  
     command: npm run dev
@@ -42,46 +54,33 @@ services:
     #    npm install yarn -g
     #    yarn install
     #    yarn dev  
-  web: 
+  # web: 
+  #   image: node:10.15.3-alpine
+  #   volumes:
+  #     - ./services/web/:/app
+  #   working_dir: /app
+  #   environment:
+  #     - PORT=3000
+  #     - JWT_SECRET=__JWT_SECRET_KEY__
+  #     - ARTICLE_API_PATH=http://article
+  #   # ports:
+  #   #  - 80:3000
+  #   depends_on:
+  #     - mongodb    
+  #   command: npm run dev         
+  web_content: 
     image: node:10.15.3-alpine
     volumes:
-      - ./services/web/:/app
+      - ./services/web-content/:/app
     working_dir: /app
     environment:
       - PORT=3000
       - JWT_SECRET=__JWT_SECRET_KEY__
-      - ARTICLE_API_PATH=http://article
-    ports:
-      - 80:3000
-    depends_on:
-      - mongodb    
-    command: npm run dev
-    #  - /bin/bash
-    #  - -c
-    #  - |
-    #    npm install yarn -g
-    #    yarn install
-    #    yarn dev            
-  web_dashboard: 
-    image: node:10.15.3-alpine
-    volumes:
-      - ./services/web-dashboard/:/app
-    working_dir: /app
-    environment:
-      - PORT=3000
-      - JWT_SECRET=__JWT_SECRET_KEY__
-      - ARTICLE_API_PATH=http://article:5002
-      - USER_API_PATH=http://user:5001
-    ports:
-      - 3000:3000
-    
-    command: npm run dev
-    #  - /bin/bash
-    #  - -c
-    #  - |
-    #    npm install yarn -g
-    #    yarn install
-    #    yarn dev                  
+      - ARTICLE_API_PATH=http://article:3000
+      - USER_API_PATH=http://user:3000
+    # ports:
+    #  - 3000:3000
+    command: npm run dev              
   mongodb:
     image: mongo:latest
     container_name: 'mongo_db'

@@ -1,0 +1,20 @@
+POST http://api-user.webcontent.local:80/u
+Content-Type: application/json
+
+{
+	"username": "admin01",
+	"password": "admin01",
+	"email": "admin01@example.com",
+	"alias": "admin01 test",
+	"avatar": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRjEhA7155z7uyUfa7ZmwD267w8cVNW4T95kzV0Re67GpgXrwI8"
+}
+
+###
+
+POST http://api-user.webcontent.local:80/auth
+Content-Type: application/json
+
+{
+	"username": "bbbb",
+	"password": "bbbb"
+}

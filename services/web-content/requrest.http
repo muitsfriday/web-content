@@ -1,0 +1,6 @@
+GET http://localhost:3001/
+Content-Type: application/json
+
+
+###
+GET http://localhost:8080/api/article
