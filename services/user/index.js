@@ -98,7 +98,7 @@ app.post("/auth", (req, res) => {
           avatar: result.avatar,
         },
         jwtSecret,
-        { expiresIn: "2h" }
+        { expiresIn: "2d" }
       );
       return res.json({ 
         token: token,

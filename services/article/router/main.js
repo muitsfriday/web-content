@@ -3,6 +3,9 @@ const auth = require('../middleware/auth').default
 
 function getRouter(db) {
 
+  /**
+   * list article
+   */
   router.get('/', (req, res) => {
     const collecton = db.collection('article')
     const getArticlesTask = collecton
